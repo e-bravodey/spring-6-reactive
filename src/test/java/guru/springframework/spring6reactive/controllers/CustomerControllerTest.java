@@ -1,5 +1,6 @@
 package guru.springframework.spring6reactive.controllers;
 
+import guru.springframework.spring6reactive.domain.Customer;
 import guru.springframework.spring6reactive.model.CustomerDTO;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -20,6 +21,16 @@ class CustomerControllerTest {
     @Autowired
     WebTestClient webTestClient;
 
+
+    @Test
+    @Order(999)
+    void testDeleteCustomerNotFound() {
+        webTestClient.delete()
+                .uri(CustomerController.CUSTOMER_PATH_ID, 99)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
+    }
     @Test
     @Order(999)
     void testDeleteCustomer() {
@@ -32,6 +43,28 @@ class CustomerControllerTest {
 
     @Test
     @Order(3)
+    void testUpdateCustomerNotFound() {
+        webTestClient.put()
+                .uri(CustomerController.CUSTOMER_PATH_ID, 99)
+                .body(Mono.just(getCustomerDto()), CustomerDTO.class)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    @Order(3)
+    void testUpdateCustomerBadRequest() {
+        CustomerDTO testCustomer = getCustomerDto();
+        testCustomer.setCustomerName(" ");
+        webTestClient.put()
+                .uri(CustomerController.CUSTOMER_PATH_ID, 1)
+                .body(Mono.just(testCustomer), CustomerDTO.class)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    @Order(3)
     void testUpdateCustomer() {
         webTestClient.put()
                 .uri(CustomerController.CUSTOMER_PATH_ID, 1)
@@ -40,6 +73,18 @@ class CustomerControllerTest {
                 .expectStatus().isNoContent();
     }
 
+
+    @Test
+    void testCreateCustomerBadRequest() {
+        CustomerDTO testCustomer = getCustomerDto();
+        testCustomer.setCustomerName(" ");
+
+        webTestClient.post().uri(CustomerController.CUSTOMER_PATH)
+                .body(Mono.just(testCustomer), CustomerDTO.class)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+    }
     @Test
     void testCreateCustomer() {
 
@@ -49,6 +94,15 @@ class CustomerControllerTest {
                 .exchange()
                 .expectStatus().isCreated()
                 .expectHeader().location("http://localhost:8080/api/v2/customer/4");
+    }
+
+    @Test
+    @Order(1)
+    void testGetByIdNotFound() {
+        webTestClient.get().uri(CustomerController.CUSTOMER_PATH_ID, 999)
+                .exchange()
+                .expectStatus().isNotFound();
+
     }
 
     @Test
