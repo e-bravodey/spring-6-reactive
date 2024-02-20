@@ -23,22 +23,22 @@ public class CustomerController {
 
     @DeleteMapping(CUSTOMER_PATH_ID)
     Mono<ResponseEntity<Void>> deleteById(@PathVariable("customerId") Integer customerId){
-        return customerService.deleteCustomerById(customerId).map(response -> ResponseEntity
-                .noContent().build());
+        return customerService.deleteCustomerById(customerId)
+                .thenReturn(ResponseEntity.noContent().build());
     }
 
     @PatchMapping(CUSTOMER_PATH_ID)
     Mono<ResponseEntity<Void>> patchExistingCustomer(@PathVariable("customerId") Integer customerId,
                                                      @Validated @RequestBody CustomerDTO customerDTO){
         return customerService.patchCustomer(customerId, customerDTO)
-                .map(updatedDto -> ResponseEntity.ok().build());
+                .map(updatedDto -> ResponseEntity.noContent().build());
     }
 
     @PutMapping(CUSTOMER_PATH_ID)
     Mono<ResponseEntity<Void>> updateExistingCustomer(@PathVariable("customerId") Integer customerId,
                                                   @Validated @RequestBody CustomerDTO customerDTO){
         return customerService.updateCustomer(customerId, customerDTO)
-                .map(savedDto -> ResponseEntity.ok().build());
+                .map(savedDto -> ResponseEntity.noContent().build());
     }
 
     @PostMapping(CUSTOMER_PATH)
